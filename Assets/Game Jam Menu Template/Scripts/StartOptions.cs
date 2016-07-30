@@ -11,8 +11,6 @@ using Newtonsoft.Json.Linq;
 
 public class StartOptions : MonoBehaviour {
 
-
-
 	public int sceneToStart = 1;										//Index number in build settings of scene to load if changeScenes is true
 	public bool changeScenes;											//If true, load a new scene when Start is pressed, if false, fade out UI and continue in single scene
 	public bool changeMusicOnStart;										//Choose whether to continue playing menu music or start a new music clip
@@ -41,6 +39,7 @@ public class StartOptions : MonoBehaviour {
 	private ShowPanels showPanels;										//Reference to ShowPanels script on UI GameObject, to show and hide panels
 
 	void Awake () {
+		
 		// register events
 		AirConsole.instance.onReady += OnReady;
 		AirConsole.instance.onMessage += OnMessage;
@@ -55,7 +54,7 @@ public class StartOptions : MonoBehaviour {
 		logWindow.text = "Connecting... \n \n";
 		//Get a reference to ShowPanels attached to UI object
 		showPanels = GetComponent<ShowPanels> ();
-
+		showPanels.ShowMenu ();
 		//Get a reference to PlayMusic attached to UI object
 		playMusic = GetComponent<PlayMusic> ();
 	}
