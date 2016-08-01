@@ -21,9 +21,7 @@ public class StartOptions : MonoBehaviour {
 	public Renderer profilePicturePlaneRenderer5;
 	public Renderer profilePicturePlaneRenderer6;
 	public Text logWindow;
-	private bool turnLeft;
-	private bool turnRight;
-
+	public Text NoticeText;
 
 
 
@@ -41,26 +39,27 @@ public class StartOptions : MonoBehaviour {
 	void Awake () {
 		
 		// register events
-		AirConsole.instance.onReady += OnReady;
-		AirConsole.instance.onMessage += OnMessage;
-		AirConsole.instance.onConnect += OnConnect;
-		AirConsole.instance.onDisconnect += OnDisconnect;
-		AirConsole.instance.onDeviceStateChange += OnDeviceStateChange;
-		AirConsole.instance.onCustomDeviceStateChange += OnCustomDeviceStateChange;
-		AirConsole.instance.onDeviceProfileChange += OnDeviceProfileChange;
-		AirConsole.instance.onAdShow += OnAdShow;
-		AirConsole.instance.onAdComplete += OnAdComplete;
+//		AirConsole.instance.onReady += OnReady;
+//		AirConsole.instance.onMessage += OnMessage;
+//		AirConsole.instance.onConnect += OnConnect;
+//		AirConsole.instance.onDisconnect += OnDisconnect;
+//		AirConsole.instance.onDeviceStateChange += OnDeviceStateChange;
+//		AirConsole.instance.onCustomDeviceStateChange += OnCustomDeviceStateChange;
+//		AirConsole.instance.onDeviceProfileChange += OnDeviceProfileChange;
+//		AirConsole.instance.onAdShow += OnAdShow;
+//		AirConsole.instance.onAdComplete += OnAdComplete;
 		//AirConsole.instance.onGameEnd += OnGameEnd;
-		logWindow.text = "Connecting... \n \n";
+//		logWindow.text = "Connecting... \n \n";
 		//Get a reference to ShowPanels attached to UI object
 		showPanels = GetComponent<ShowPanels> ();
 		showPanels.ShowMenu ();
 		//Get a reference to PlayMusic attached to UI object
 		playMusic = GetComponent<PlayMusic> ();
 	}
+
 	void OnReady (string code) {
 		//Log to on-screen Console
-		logWindow.text = "ExampleBasic: AirConsole is ready! \n \n";
+//		logWindow.text = "ExampleBasic: AirConsole is ready! \n \n";
 
 		//Mark Buttons as Interactable as soon as AirConsole is ready
 		Button[] allButtons = (Button[])GameObject.FindObjectsOfType ((typeof(Button)));
@@ -71,25 +70,6 @@ public class StartOptions : MonoBehaviour {
 	void OnMessage (int from, JToken data) {
 		//Log to on-screen Console
 		logWindow.text = logWindow.text.Insert (0, "Incoming message from device: " + from + ": " + data.ToString () + " \n \n");
-
-		// Rotate the AirConsole Logo to the right
-		if ((string)data == "left") {
-			turnLeft = true;
-			turnRight = false;
-		}
-
-		// Rotate the AirConsole Logo to the right
-		if ((string)data == "right") {
-			turnLeft = false;
-			turnRight = true;
-		}
-
-		// Stop rotating the AirConsole Logo
-		//'stop' is sent when a button on the controller is released
-		if ((string)data == "stop") {
-			turnLeft = false;
-			turnRight = false;
-		}
 	}
 
 	public void StartButtonClicked()
@@ -169,12 +149,12 @@ public class StartOptions : MonoBehaviour {
 	}
 	public void update_profile()
 	{
-		DisplayProfilePicture (0,profilePicturePlaneRenderer1);
-		DisplayProfilePicture (1,profilePicturePlaneRenderer2);
-		DisplayProfilePicture (2,profilePicturePlaneRenderer3);
-		DisplayProfilePicture (3,profilePicturePlaneRenderer4);
-		DisplayProfilePicture (4,profilePicturePlaneRenderer5);
-		DisplayProfilePicture (5,profilePicturePlaneRenderer6);
+//		DisplayProfilePicture (0,profilePicturePlaneRenderer1);
+//		DisplayProfilePicture (1,profilePicturePlaneRenderer2);
+//		DisplayProfilePicture (2,profilePicturePlaneRenderer3);
+//		DisplayProfilePicture (3,profilePicturePlaneRenderer4);
+//		DisplayProfilePicture (4,profilePicturePlaneRenderer5);
+//		DisplayProfilePicture (5,profilePicturePlaneRenderer6);
 
 	}
 
@@ -220,6 +200,33 @@ public class StartOptions : MonoBehaviour {
 		//Log to on-screen Console
 		update_profile();
 		logWindow.text = logWindow.text.Insert (0, "Device: " + device_id + " connected. \n \n");
+		if (AirConsole.instance.GetActivePlayerDeviceIds.Count == 0) {
+			if (AirConsole.instance.GetControllerDeviceIds ().Count >= 2) {
+				NoticeText.text = "Press Start When Ready";
+			} else {
+				NoticeText.text = "NEED MORE PLAYERS";
+			}
+		}
+	}
+
+	public string DisplayCustomProperty (int ControllerDeviceIds, string ReqData) {
+
+		int idOfController = AirConsole.instance.GetControllerDeviceIds () [ControllerDeviceIds];
+
+		//Get the Custom Device State of the  Controller
+		JToken data = AirConsole.instance.GetCustomDeviceState (idOfController);
+
+		if (data != null && data [ReqData] != null) {
+			string ReqDataContents  = (string)data [ReqData];
+			logWindow.text = logWindow.text.Insert (0, "value "+ ReqData + ":" + ReqDataContents + "\n \n");
+			return ReqDataContents;
+
+		} else {
+
+			logWindow.text = logWindow.text.Insert (0, "No "+ReqData +" property set on first Controller \n \n");
+			return null;
+		}
+
 	}
 
 	void OnDisconnect (int device_id) {

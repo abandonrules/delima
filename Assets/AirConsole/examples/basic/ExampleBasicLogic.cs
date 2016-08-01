@@ -7,24 +7,25 @@ using Newtonsoft.Json.Linq;
 
 public class ExampleBasicLogic : MonoBehaviour {
 
-	public GameObject logo;
 	public Renderer profilePicturePlaneRenderer;
 	public Text logWindow;
-	private bool turnLeft;
-	private bool turnRight;
+	public Renderer profilePicturePlaneRenderer1;
+	public Renderer profilePicturePlaneRenderer2;
+	public Renderer profilePicturePlaneRenderer3;
+	public Renderer profilePicturePlaneRenderer4;
+	public Renderer profilePicturePlaneRenderer5;
+	public Renderer profilePicturePlaneRenderer6;
 
 	void Awake () {
 		// register events
-		AirConsole.instance.onReady += OnReady;
-		AirConsole.instance.onMessage += OnMessage;
-		AirConsole.instance.onConnect += OnConnect;
-		AirConsole.instance.onDisconnect += OnDisconnect;
-		AirConsole.instance.onDeviceStateChange += OnDeviceStateChange;
-		AirConsole.instance.onCustomDeviceStateChange += OnCustomDeviceStateChange;
-		AirConsole.instance.onDeviceProfileChange += OnDeviceProfileChange;
-		AirConsole.instance.onAdShow += OnAdShow;
-		AirConsole.instance.onAdComplete += OnAdComplete;
-		AirConsole.instance.onGameEnd += OnGameEnd;
+//		AirConsole.instance.onReady += OnReady;
+//		AirConsole.instance.onMessage += OnMessage;
+//		AirConsole.instance.onConnect += OnConnect;
+//		AirConsole.instance.onDisconnect += OnDisconnect;
+//		AirConsole.instance.onDeviceStateChange += OnDeviceStateChange;
+//		AirConsole.instance.onCustomDeviceStateChange += OnCustomDeviceStateChange;
+//		AirConsole.instance.onDeviceProfileChange += OnDeviceProfileChange;
+//		AirConsole.instance.onGameEnd += OnGameEnd;
 		logWindow.text = "Connecting... \n \n";
 	}
 
@@ -42,40 +43,19 @@ public class ExampleBasicLogic : MonoBehaviour {
 	void OnMessage (int from, JToken data) {
 		//Log to on-screen Console
 		logWindow.text = logWindow.text.Insert (0, "Incoming message from device: " + from + ": " + data.ToString () + " \n \n");
-		
-		// Rotate the AirConsole Logo to the right
-		if ((string)data == "left") {
-			turnLeft = true;
-			turnRight = false;
-		}
 
-		// Rotate the AirConsole Logo to the right
-		if ((string)data == "right") {
-			turnLeft = false;
-			turnRight = true;
-		}
-
-		// Stop rotating the AirConsole Logo
-		//'stop' is sent when a button on the controller is released
-		if ((string)data == "stop") {
-			turnLeft = false;
-			turnRight = false;
-		}
-
-		//Show an Ad
-		if ((string)data == "show_ad") {
-			AirConsole.instance.ShowAd ();
-		}
 	}
 
 	void OnConnect (int device_id) {
 		//Log to on-screen Console
 		logWindow.text = logWindow.text.Insert (0, "Device: " + device_id + " connected. \n \n");
+		updateprofiles ();
 	}
 
 	void OnDisconnect (int device_id) {
 		//Log to on-screen Console
 		logWindow.text = logWindow.text.Insert (0, "Device: " + device_id + " disconnected. \n \n");
+		updateprofiles ();
 	}
 
 	void OnDeviceStateChange (int device_id, JToken data) {
@@ -91,17 +71,9 @@ public class ExampleBasicLogic : MonoBehaviour {
 	void OnDeviceProfileChange (int device_id) {
 		//Log to on-screen Console
 		logWindow.text = logWindow.text.Insert (0, "Device " + device_id + " made changes to its profile. \n \n");
+		updateprofiles ();
 	}
 
-	void OnAdShow () {
-		//Log to on-screen Console
-		logWindow.text = logWindow.text.Insert (0, "On Ad Show \n \n");
-	}
-
-	void OnAdComplete (bool adWasShown) {
-		//Log to on-screen Console
-		logWindow.text = logWindow.text.Insert (0, "Ad Complete. Ad was shown: " + adWasShown + "\n \n");
-	}
 
 	void OnGameEnd () {
 		Debug.Log ("OnGameEnd is called");
@@ -111,12 +83,25 @@ public class ExampleBasicLogic : MonoBehaviour {
 
 	void Update () {
 		//If any controller is pressing a 'Rotate' button, rotate the AirConsole Logo in the scene
-		if (turnLeft) {
-			this.logo.transform.Rotate (0, 0, 2);
-		
-		} else if (turnRight) {
-			this.logo.transform.Rotate (0, 0, -2);
-		}
+	}
+	void updateprofiles(){
+		DisplayProfilePicture (0,profilePicturePlaneRenderer1);
+		DisplayProfilePicture (1,profilePicturePlaneRenderer2);
+		DisplayProfilePicture (2,profilePicturePlaneRenderer3);
+		DisplayProfilePicture (3,profilePicturePlaneRenderer4);
+		DisplayProfilePicture (4,profilePicturePlaneRenderer5);
+		DisplayProfilePicture (5,profilePicturePlaneRenderer6);
+	}
+	public void DisplayProfilePicture (int device_id,Renderer profilePicturePlaneRenderer) {
+		//We cannot assume that the first controller's device ID is '1', because device 1 
+		//might have left and now the first controller in the list has a different ID.
+		//Never hardcode device IDs!		
+		int idOfController = AirConsole.instance.GetControllerDeviceIds () [device_id];
+
+		string urlOfProfilePic = AirConsole.instance.GetProfilePicture (idOfController, 512);
+		//Log url to on-screen Console
+		logWindow.text = logWindow.text.Insert (0, "URL of Profile Picture of " + device_id +" Controller: " + urlOfProfilePic + "\n \n");
+		StartCoroutine (DisplayUrlPicture (urlOfProfilePic, profilePicturePlaneRenderer));
 	}
 
 	public void SendMessageToController1 () {
@@ -160,36 +145,29 @@ public class ExampleBasicLogic : MonoBehaviour {
 		
 	}
 
-	private IEnumerator DisplayUrlPicture (string url) {
+	private IEnumerator DisplayUrlPicture (string url, Renderer profilePicturePlaneRenderer) {
+
+		Color color = Color.white;
+		color.a = 0;
+		profilePicturePlaneRenderer.material.color = color;
+
 		// Start a download of the given URL
 		WWW www = new WWW (url);
-		
+
 		// Wait for download to complete
 		yield return www;
-		
+
 		// assign texture
 		profilePicturePlaneRenderer.material.mainTexture = www.texture;
-		Color color = Color.white;
+		//Color color = Color.white;
 		color.a = 1;
 		profilePicturePlaneRenderer.material.color = color;
 
-		yield return new WaitForSeconds (3.0f);
+		//yield return new WaitForSeconds (3.0f);
 
-		color.a = 0;
-		profilePicturePlaneRenderer.material.color = color;
-		
-	}
-	
-	public void DisplayProfilePictureOfFirstController () {
-		//We cannot assume that the first controller's device ID is '1', because device 1 
-		//might have left and now the first controller in the list has a different ID.
-		//Never hardcode device IDs!		
-		int idOfFirstController = AirConsole.instance.GetControllerDeviceIds () [0];
-	
-		string urlOfProfilePic = AirConsole.instance.GetProfilePicture (idOfFirstController, 512);
-		//Log url to on-screen Console
-		logWindow.text = logWindow.text.Insert (0, "URL of Profile Picture of first Controller: " + urlOfProfilePic + "\n \n");
-		StartCoroutine (DisplayUrlPicture (urlOfProfilePic));
+		//color.a = 0;
+		//profilePicturePlaneRenderer.material.color = color;
+
 	}
 
 	public void DisplayAllCustomDataOfFirstController () {
@@ -236,6 +214,28 @@ public class ExampleBasicLogic : MonoBehaviour {
 		} else {
 			logWindow.text = logWindow.text.Insert (0, "No 'health' property set on first Controller \n \n");
 		}
+	}
+
+	public string DisplayCustomProperty (int ControllerDeviceIds,string ReqData) {
+		//We cannot assume that the first controller's device ID is '1', because device 1 
+		//might have left and now the first controller in the list has a different ID.
+		//Never hardcode device IDs!		
+		int idOfController = AirConsole.instance.GetControllerDeviceIds () [ControllerDeviceIds];
+
+		//Get the Custom Device State of the first Controller
+		JToken data = AirConsole.instance.GetCustomDeviceState (idOfController);
+
+		//If it exists, get the data's health property and cast it as int
+		if (data != null && data [ReqData] != null) {
+			string ReqDataContents  = (string)data [ReqData];
+			logWindow.text = logWindow.text.Insert (0, "value "+ ReqData + ":" + ReqDataContents + "\n \n");
+			return  ReqDataContents;
+		} else {
+
+			logWindow.text = logWindow.text.Insert (0, "No "+ReqData +" property set on first Controller \n \n");
+			return null;
+		}
+
 	}
 
 	public void SetSomeCustomDataOnScreen () {
@@ -331,25 +331,6 @@ public class ExampleBasicLogic : MonoBehaviour {
 		logWindow.text = logWindow.text.Insert (0, "Showed Default UI" + "\n \n");
 	}
 
-	public void NavigateHome () {
-		//Navigate back to the AirConsole store
-		AirConsole.instance.NavigateHome ();
-
-		//Log to on-screen Console
-		logWindow.text = logWindow.text.Insert (0, "Navigated back to home screen" + "\n \n");
-	}
-
-	public void NavigateToPong () {
-		//Navigate to another game
-		AirConsole.instance.NavigateTo ("http://games.airconsole.com/pong/");
-	}
-
-	public void ShowAd () {
-		//Display an Advertisement
-		AirConsole.instance.ShowAd ();
-		//Log to on-screen Console
-		logWindow.text = logWindow.text.Insert (0, "Called ShowAd" + "\n \n");
-	}
 
 	void OnDestroy () {
 
@@ -361,8 +342,6 @@ public class ExampleBasicLogic : MonoBehaviour {
 			AirConsole.instance.onDisconnect -= OnDisconnect;
 			AirConsole.instance.onDeviceStateChange -= OnDeviceStateChange;
 			AirConsole.instance.onCustomDeviceStateChange -= OnCustomDeviceStateChange;
-			AirConsole.instance.onAdShow -= OnAdShow;
-			AirConsole.instance.onAdComplete -= OnAdComplete;
 			AirConsole.instance.onGameEnd -= OnGameEnd;
 		}
 	}

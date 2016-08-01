@@ -2,7 +2,7 @@
 <html>
 <head>
     <script type="text/javascript"
-            src="https://www.airconsole.com/api/airconsole-1.4.0.js"></script>
+            src="https://www.airconsole.com/api/airconsole-1.5.0.js"></script>
     <script type="text/javascript">
     navigator.vibrate = (navigator.vibrate ||
                          navigator.webkitVibrate ||
@@ -28,6 +28,10 @@
         updateText();
       }
     }
+    App.prototype.setCustomDeviceStateProperty = function(key, value) {
+       this.airconsole.setCustomDeviceStateProperty(key, value);
+       ("#aliance").empty();
+    };
 
 	function updateText(player_number) {
 	  var div = document.getElementById("player_id");
@@ -55,49 +59,62 @@
         @font-face {
             font-family: 'Arial';
         }
+            .button{
+   background: #3B3B3B;
+   color: white;
+   font-family: Arial;
+   font-size: 14px;
+   padding: 5px 10px 5px 10px;
+   border: solid #1f1f1f 2px;
+   -webkit-border-radius: 11;
+   -moz-border-radius: 11;
+   border-radius: 6px;
+   width: 100%;
+   text-align: left;
+  }
+  
+  .button-left{
+   width: 50%;
+   left: 0px;   
+  }
+  
+  .button-right{
+   width: 50%;
+   float: right;
+   right: 0px;   
+  }
+  
+  #content{
+   position:absolute;
+   font-family: Arial;
+   color: white;
+   bottom: 5%;
+  }
+  
+  #profile-pic{
+   position:absolute;
+   background-size: cover;
+   width: 50px;
+   height: 50px;
+   right: 5%;
+   bottom: 5%;
+  }
 
-        html, body {
-            height: 100%;
-            margin: 0px;
-            font-family: 'PressStart2P', sans-serif;
-            color: white;
-            text-align: center;
-            background-color: black;
-        }
-
-        .button {
-            display: inline-block;
-            height: 45%;
-            width: 98%;
-            background-color: #222;
-            position: relative;
-        }
-
-        .button_label {
-            position: absolute;
-            left: 0px;
-            width: 100%;
-            top: 50%;
-            margin-top: -6px;
-        }
-
-        #player_id {
-            position: absolute;
-            top: 50%;
-            left: 0%;
-            width: 100%;
-            margin-top: -8px;
-            color: #777;
-        }
     </style>
 </head>
 <body onload="init()">
-    <div style="height: 1%"></div>
-    <div class=button ontouchstart="move(5)" ontouchend="move(0)" onmousedown="move(5)" onmouseup="move(0)">
+    <div style="margin-top:50px">
+        <div style="float:left">
+     <div id="aliance"> 
+		<button class="button button-left" ontouchstart="window.app.setCustomDeviceStateProperty('aliance', peace)">PEACE</button>
+		<button class="button button-right" ontouchstart="window.app.setCustomDeviceStateProperty('aliance', punch)">PUNCH</button>
+    </div>
+
+    <div class=button-touch ontouchstart="move(5)" ontouchend="move(0)" onmousedown="move(5)" onmouseup="move(0)">
         <div class="button_label">UP</div>
     </div>
     <div style="height: 8%"></div>
-    <div class=button ontouchstart="move(-5)" ontouchend="move(0)" onmousedown="move(-5)" onmouseup="move(0)">
+    <div class=button-touch ontouchstart="move(-5)" ontouchend="move(0)" onmousedown="move(-5)" onmouseup="move(0)">
         <div class="button_label">DOWN</div>
     </div>
     <div id="player_id"></div>

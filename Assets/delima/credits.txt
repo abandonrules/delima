@@ -18,3 +18,5 @@ https://github.com/BorisTheBrave/resynth-tiles
 
 http://developers.airconsole.com/#/guides/unity
 https://github.com/AirConsole/airconsole-unity-plugin
+http://arongranberg.com/astar/download
+http://www.javascriptkit.com/javatutors/touchevents.shtml
